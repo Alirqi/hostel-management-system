@@ -14,6 +14,13 @@ async function main() {
   });
   try {
     await db.query("CREATE TABLE IF NOT EXISTS schema_migrations (id VARCHAR(100) PRIMARY KEY, applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+    // Bring forward older databases that predate the admin username column.
+    const [adminColumns] = await db.query("SHOW COLUMNS FROM admin LIKE 'username'");
+    if (adminColumns.length === 0) {
+      await db.query("ALTER TABLE admin ADD COLUMN username VARCHAR(255) NOT NULL DEFAULT '' AFTER id");
+      await db.query("UPDATE admin SET username = SUBSTRING_INDEX(email, '@', 1) WHERE username = ''");
+      console.log("Administrator username column migrated");
+    }
     const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
     if (bootstrapPassword) {
       const [admins] = await db.query("SELECT id FROM admin LIMIT 1");
