@@ -16,7 +16,7 @@
 ?>
 
 <!DOCTYPE html>
-<html dir="ltr" lang="en">
+<html dir="rtl" lang="ar">
 
 <head>
     <meta charset="utf-8">
@@ -46,6 +46,7 @@
         }
     </script>
 
+    <link href="../assets/css/modern-hostel.css" rel="stylesheet">
 </head>
 
 <body>
