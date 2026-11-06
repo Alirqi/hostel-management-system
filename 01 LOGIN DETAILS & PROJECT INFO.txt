@@ -1,0 +1,4 @@
+تفاصيل تسجيل الدخول
+
+Username: admin
+Password: Password@123
