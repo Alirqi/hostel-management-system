@@ -27,7 +27,7 @@
 ?>
 
 <!DOCTYPE html>
-<html dir="ltr" lang="en">
+<html dir="rtl" lang="ar">
 
 <head>
     <meta charset="utf-8">
