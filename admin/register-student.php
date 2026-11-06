@@ -51,6 +51,7 @@
     }
     </script>
     
+    <link href="../assets/css/modern-hostel.css" rel="stylesheet">
 </head>
 
 <body>
