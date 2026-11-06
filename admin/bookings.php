@@ -1,40 +1,77 @@
 <?php
-    session_start();
-    include('../includes/dbconn.php');
-    include('../includes/check-login.php');
-    check_login();
-    //code for registration
-    if(isset($_POST['submit'])){
-        $roomno=$_POST['room'];
-        $seater=$_POST['seater'];
-        $feespm=$_POST['fpm'];
-        $foodstatus=$_POST['foodstatus'];
-        $stayfrom=$_POST['stayf'];
-        $duration=$_POST['duration'];
-        $course=$_POST['course'];
-        $regno=$_POST['regno'];
-        $fname=$_POST['fname'];
-        $mname=$_POST['mname'];
-        $lname=$_POST['lname'];
-        $gender=$_POST['gender'];
-        $contactno=$_POST['contact'];
-        $emailid=$_POST['email'];
-        $emcntno=$_POST['econtact'];
-        $gurname=$_POST['gname'];
-        $gurrelation=$_POST['grelation'];
-        $gurcntno=$_POST['gcontact'];
-        $caddress=$_POST['address'];
-        $ccity=$_POST['city'];
-        $cpincode=$_POST['pincode'];
-        $paddress=$_POST['paddress'];
-        $pcity=$_POST['pcity'];
-        $ppincode=$_POST['ppincode'];
-        $query="INSERT into  registration(roomno,seater,feespm,foodstatus,stayfrom,duration,course,regno,firstName,middleName,lastName,gender,contactno,emailid,egycontactno,guardianName,guardianRelation,guardianContactno,corresAddress,corresCIty,corresPincode,pmntAddress,pmntCity,pmntPincode) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        $stmt = $mysqli->prepare($query);
-        $rc=$stmt->bind_param('iiiisissssssisissississi',$roomno,$seater,$feespm,$foodstatus,$stayfrom,$duration,$course,$regno,$fname,$mname,$lname,$gender,$contactno,$emailid,$emcntno,$gurname,$gurrelation,$gurcntno,$caddress,$ccity,$cpincode,$paddress,$pcity,$ppincode);
-        $stmt->execute();
-        echo"<script>alert('تم الحجز بنجاح');</script>";
+session_start();
+require_once __DIR__ . '/../includes/dbconn.php';
+require_once __DIR__ . '/../includes/check-login.php';
+check_login();
+$bookingError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+    $roomno = filter_var($_POST['room'] ?? null, FILTER_VALIDATE_INT);
+    $seater = filter_var($_POST['seater'] ?? null, FILTER_VALIDATE_INT);
+    $feespm = filter_var($_POST['fpm'] ?? null, FILTER_VALIDATE_INT);
+    $foodstatus = filter_var($_POST['foodstatus'] ?? null, FILTER_VALIDATE_INT);
+    $duration = filter_var($_POST['duration'] ?? null, FILTER_VALIDATE_INT);
+    $stayfrom = (string)($_POST['stayf'] ?? '');
+    $regno = trim((string)($_POST['regno'] ?? ''));
+    $fname = trim((string)($_POST['fname'] ?? ''));
+    $mname = trim((string)($_POST['mname'] ?? ''));
+    $lname = trim((string)($_POST['lname'] ?? ''));
+    $gender = trim((string)($_POST['gender'] ?? ''));
+    $contactno = trim((string)($_POST['contact'] ?? ''));
+    $emailid = trim((string)($_POST['email'] ?? ''));
+    $emcntno = trim((string)($_POST['econtact'] ?? ''));
+    $course = trim((string)($_POST['course'] ?? ''));
+    $gurname = trim((string)($_POST['gname'] ?? ''));
+    $gurrelation = trim((string)($_POST['grelation'] ?? ''));
+    $gurcntno = trim((string)($_POST['gcontact'] ?? ''));
+    $caddress = trim((string)($_POST['address'] ?? ''));
+    $ccity = trim((string)($_POST['city'] ?? ''));
+    $cpincode = filter_var($_POST['pincode'] ?? null, FILTER_VALIDATE_INT);
+    $paddress = trim((string)($_POST['paddress'] ?? ''));
+    $pcity = trim((string)($_POST['pcity'] ?? ''));
+    $ppincode = filter_var($_POST['ppincode'] ?? null, FILTER_VALIDATE_INT);
+    if (!$roomno || !$seater || $feespm === false || !$duration || $foodstatus === false ||
+        !DateTime::createFromFormat('Y-m-d', $stayfrom) ||
+        !filter_var($emailid, FILTER_VALIDATE_EMAIL) || $regno === '' || $fname === '' ||
+        $lname === '' || $contactno === '' || $cpincode === false) {
+        $bookingError = 'تحقق من الحقول المطلوبة وتأكد من صحة البريد والتاريخ والأرقام.';
+    } else {
+        if (isset($_POST['adcheck'])) {
+            $paddress = $caddress; $pcity = $ccity; $ppincode = $cpincode;
+        }
+        if ($ppincode === false || $paddress === '' || $pcity === '') {
+            $bookingError = 'أكمل بيانات العنوان الدائم أو اختر أن يكون مطابقاً لعنوان المراسلة.';
+        } else {
+            try {
+                $mysqli->begin_transaction();
+                $roomStmt = $mysqli->prepare('SELECT seater, fees FROM rooms WHERE room_no = ? FOR UPDATE');
+                $roomStmt->bind_param('i', $roomno); $roomStmt->execute();
+                $room = $roomStmt->get_result()->fetch_assoc(); $roomStmt->close();
+                $countStmt = $mysqli->prepare('SELECT COUNT(*) AS occupied FROM registration WHERE roomno = ?');
+                $countStmt->bind_param('i', $roomno); $countStmt->execute();
+                $occupied = (int)$countStmt->get_result()->fetch_assoc()['occupied']; $countStmt->close();
+                $duplicateStmt = $mysqli->prepare('SELECT id FROM registration WHERE emailid = ? LIMIT 1');
+                $duplicateStmt->bind_param('s', $emailid); $duplicateStmt->execute();
+                $duplicate = $duplicateStmt->get_result()->fetch_assoc(); $duplicateStmt->close();
+                if (!$room || $occupied >= (int)$room['seater']) {
+                    $mysqli->rollback(); $bookingError = 'الغرفة غير موجودة أو اكتمل عدد المقيمين فيها.';
+                } elseif ($duplicate) {
+                    $mysqli->rollback(); $bookingError = 'يوجد حجز مسجل مسبقاً بهذا البريد الإلكتروني.';
+                } else {
+                    $seater = (int)$room['seater']; $feespm = (int)$room['fees'];
+                    $corresState = ''; $pmntState = ''; $updated = date('Y-m-d');
+                    $sql = 'INSERT INTO registration (roomno,seater,feespm,foodstatus,stayfrom,duration,course,regno,firstName,middleName,lastName,gender,contactno,emailid,egycontactno,guardianName,guardianRelation,guardianContactno,corresAddress,corresCIty,corresState,corresPincode,pmntAddress,pmntCity,pmnatetState,pmntPincode,updationDate) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+                    $insert = $mysqli->prepare($sql);
+                    $insert->bind_param('iiiisisssssssssssssssisssis', $roomno,$seater,$feespm,$foodstatus,$stayfrom,$duration,$course,$regno,$fname,$mname,$lname,$gender,$contactno,$emailid,$emcntno,$gurname,$gurrelation,$gurcntno,$caddress,$ccity,$corresState,$cpincode,$paddress,$pcity,$pmntState,$ppincode,$updated);
+                    $insert->execute(); $insert->close(); $mysqli->commit();
+                    header('Location: manage-students.php?booking=success'); exit;
+                }
+            } catch (Throwable $e) {
+                $mysqli->rollback(); error_log('Hostel booking failed: ' . $e->getMessage());
+                $bookingError = 'تعذر حفظ الحجز حالياً. تحقق من البيانات وحاول مرة أخرى.';
+            }
+        }
     }
+}
 ?>
 
 <!DOCTYPE html>
@@ -149,6 +186,7 @@
             <div class="container-fluid">
 
             <form method="POST">
+                <?php if ($bookingError !== ''): ?><div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($bookingError, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
                 
                 <?php
                     $stmt=$mysqli->prepare("SELECT emailid FROM registration WHERE emailid=? ");
