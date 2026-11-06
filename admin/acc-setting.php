@@ -1,34 +1,40 @@
 <?php
-    session_start();
-    include('../includes/dbconn.php');
-    include('../includes/check-login.php');
-    check_login();
+session_start();
+require_once __DIR__ . '/../includes/dbconn.php';
+require_once __DIR__ . '/../includes/check-login.php';
+check_login();
 
-    if(isset($_POST['changepwd'])){
-    $op=$_POST['oldpassword'];
-    $np=$_POST['newpassword'];
-    $ai=$_SESSION['id'];
-    $udate=date('Y-m-d');
-        $sql="SELECT password FROM admin where password=?";
-        $chngpwd = $mysqli->prepare($sql);
-        $chngpwd->bind_param('s',$op);
-        $chngpwd->execute();
-        $chngpwd->store_result(); 
-        $row_cnt=$chngpwd->num_rows;;
-        if($row_cnt>0)
-        {
-            $con="update admin set password=?,updation_date=?  where id=?";
-    $chngpwd1 = $mysqli->prepare($con);
-    $chngpwd1->bind_param('ssi',$np,$udate,$ai);
-    $chngpwd1->execute();
-            $_SESSION['msg']="تم تغيير كلمة المرور";
-        } else {
-            $_SESSION['msg']="كلمة المرور الحالية غير متطابقة اكتب كلمة المرور الصحيحة";
-        }	
-        
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['changepwd'])) {
+    $oldPassword = (string)($_POST['oldpassword'] ?? '');
+    $newPassword = (string)($_POST['newpassword'] ?? '');
+    $adminId = (int)$_SESSION['id'];
+    $stmt = $mysqli->prepare('SELECT password FROM admin WHERE id = ? LIMIT 1');
+    $stmt->bind_param('i', $adminId);
+    $stmt->execute();
+    $record = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
 
+    $valid = false;
+    if ($record) {
+        $stored = (string)$record['password'];
+        $legacy = strlen($stored) === 32 && ctype_xdigit($stored);
+        $valid = $legacy ? hash_equals(strtolower($stored), md5($oldPassword)) : password_verify($oldPassword, $stored);
     }
 
+    if (!$valid) {
+        $_SESSION['msg'] = 'كلمة المرور الحالية غير صحيحة.';
+    } elseif (strlen($newPassword) < 10) {
+        $_SESSION['msg'] = 'يجب أن تتكون كلمة المرور الجديدة من 10 أحرف على الأقل.';
+    } else {
+        $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $date = date('Y-m-d');
+        $update = $mysqli->prepare('UPDATE admin SET password = ?, updation_date = ? WHERE id = ?');
+        $update->bind_param('ssi', $newHash, $date, $adminId);
+        $update->execute();
+        $update->close();
+        $_SESSION['msg'] = 'تم تحديث كلمة المرور بنجاح.';
+    }
+}
 ?>
 
 <!DOCTYPE html>
