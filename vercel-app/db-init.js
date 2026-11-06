@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const mysql = require("mysql2/promise");
+const bcrypt = require("bcryptjs");
 
 async function main() {
   const db = await mysql.createConnection({
@@ -13,6 +14,17 @@ async function main() {
   });
   try {
     await db.query("CREATE TABLE IF NOT EXISTS schema_migrations (id VARCHAR(100) PRIMARY KEY, applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+    const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+    if (bootstrapPassword) {
+      const [admins] = await db.query("SELECT id FROM admin LIMIT 1");
+      if (admins.length === 0) {
+        const username = process.env.ADMIN_BOOTSTRAP_USERNAME || "hosteladmin";
+        const email = process.env.ADMIN_BOOTSTRAP_EMAIL || "admin@hostel.local";
+        const passwordHash = await bcrypt.hash(bootstrapPassword, 12);
+        await db.execute("INSERT INTO admin (username, email, password, updation_date) VALUES (?, ?, ?, CURDATE())", [username, email, passwordHash]);
+        console.log("Initial administrator account created");
+      } else console.log("Administrator already exists; bootstrap skipped");
+    }
     const [done] = await db.execute("SELECT id FROM schema_migrations WHERE id=?", ["initial-hostel-schema-v1"]);
     if (done.length) { console.log("Hostel schema already initialized"); return; }
     let source = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
