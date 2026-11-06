@@ -1,23 +1,44 @@
 <?php
-    session_start();
-    include('../includes/dbconn.php');
-    if(isset($_POST['submit']))
-    {
-    $regno=$_POST['regno'];
-    $fname=$_POST['fname'];
-    $mname=$_POST['mname'];
-    $lname=$_POST['lname'];
-    $gender=$_POST['gender'];
-    $contactno=$_POST['contact'];
-    $emailid=$_POST['email'];
-    $password=$_POST['password'];
-    $password = md5($password);
-    $query="INSERT into userRegistration(regNo,firstName,middleName,lastName,gender,contactNo,email,password) values(?,?,?,?,?,?,?,?)";
-    $stmt = $mysqli->prepare($query);
-    $rc=$stmt->bind_param('sssssiss',$regno,$fname,$mname,$lname,$gender,$contactno,$emailid,$password);
-    $stmt->execute();
-        echo"<script>alert('تم تسجيل الطالب!');</script>";
+session_start();
+require_once __DIR__ . '/../includes/dbconn.php';
+require_once __DIR__ . '/../includes/check-login.php';
+check_login();
+$registerError = '';
+$registerSuccess = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+    $regno = trim((string)($_POST['regno'] ?? ''));
+    $fname = trim((string)($_POST['fname'] ?? ''));
+    $mname = trim((string)($_POST['mname'] ?? ''));
+    $lname = trim((string)($_POST['lname'] ?? ''));
+    $gender = trim((string)($_POST['gender'] ?? ''));
+    $contactno = trim((string)($_POST['contact'] ?? ''));
+    $emailid = trim((string)($_POST['email'] ?? ''));
+    $password = (string)($_POST['password'] ?? '');
+    $confirm = (string)($_POST['cpassword'] ?? '');
+    if ($regno === '' || $fname === '' || $lname === '' || $contactno === '' ||
+        !filter_var($emailid, FILTER_VALIDATE_EMAIL) || strlen($password) < 10) {
+        $registerError = 'أكمل الحقول المطلوبة، واستخدم بريداً صحيحاً وكلمة مرور من 10 أحرف على الأقل.';
+    } elseif (!hash_equals($password, $confirm)) {
+        $registerError = 'كلمتا المرور غير متطابقتين.';
+    } else {
+        $check = $mysqli->prepare('SELECT id FROM userregistration WHERE email = ? OR regNo = ? LIMIT 1');
+        $check->bind_param('ss', $emailid, $regno);
+        $check->execute();
+        $exists = $check->get_result()->fetch_assoc();
+        $check->close();
+        if ($exists) {
+            $registerError = 'البريد الإلكتروني أو رقم التسجيل مستخدم مسبقاً.';
+        } else {
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $insert = $mysqli->prepare('INSERT INTO userregistration (regNo,firstName,middleName,lastName,gender,contactNo,email,password,updationDate,passUdateDate) VALUES (?,?,?,?,?,?,?,?,?,?)');
+            $today = date('Y-m-d');
+            $insert->bind_param('sssssissss', $regno,$fname,$mname,$lname,$gender,$contactno,$emailid,$hash,$today,$today);
+            $insert->execute();
+            $insert->close();
+            $registerSuccess = 'تم إنشاء حساب الطالب بنجاح.';
+        }
     }
+}
 ?>
 
 <!DOCTYPE html>
@@ -119,6 +140,8 @@
             <!-- ============================================================== -->
             <div class="container-fluid">
 
+                <?php if ($registerError !== ''): ?><div class="alert alert-danger"><?php echo htmlspecialchars($registerError, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
+                <?php if ($registerSuccess !== ''): ?><div class="alert alert-success"><?php echo htmlspecialchars($registerSuccess, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
                 <form method="POST" name="registration" onSubmit="return valid();">
 
                     <div class="row">
