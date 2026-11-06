@@ -25,6 +25,7 @@
     <link href="../dist/css/style.min.css" rel="stylesheet">
 
     
+    <link href="../assets/css/modern-hostel.css" rel="stylesheet">
 </head>
 
 <body>
