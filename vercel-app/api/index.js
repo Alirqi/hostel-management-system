@@ -2,10 +2,12 @@ const express = require("express");
 const mysql = require("mysql2/promise");
 const bcrypt = require("bcryptjs");
 const crypto = require("node:crypto");
+const path = require("node:path");
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, "..")));
 
 let pool;
 function db() {
@@ -42,7 +44,7 @@ function clearSession(res) {
 function readSession(req) {
   const raw = (req.headers.cookie || "").split(";").map(v => v.trim()).find(v => v.startsWith("hostel_session="));
   if (!raw || !secret()) return null;
-  const token = decodeURIComponent(raw.slice("hostel_session=".length));
+  let token; try { token = decodeURIComponent(raw.slice("hostel_session=".length)); } catch { return null; }
   const [payload, signature] = token.split(".");
   if (!payload || !signature) return null;
   const expected = Buffer.from(sign(payload));
