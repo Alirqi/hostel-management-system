@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 ?>
 
 <!DOCTYPE html>
-<html dir="ltr">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="utf-8">
@@ -48,7 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/favicon.png">
     <title>نظام ادارة سكن الطلاب</title>
     <!-- Custom CSS -->
-    <link href="../dist/css/style.min.css" rel="stylesheet">\n    <link href="../assets/css/modern-hostel.css" rel="stylesheet">
+    <link href="../dist/css/style.min.css" rel="stylesheet">
+    <link href="../assets/css/modern-hostel.css" rel="stylesheet">
 
     <script type="text/javascript">
     function valid() {
@@ -93,7 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                         </div>
                         <h2 class="mt-3 text-center">تسجيل دخول المسؤول</h2>
                         
-                        <form class="mt-4" method="POST">\n                            <?php if ($loginError !== ''): ?><div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($loginError, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
+                        <form class="mt-4" method="POST">
+                            <?php if ($loginError !== ''): ?><div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($loginError, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group">
