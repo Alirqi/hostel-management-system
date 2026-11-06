@@ -7,7 +7,7 @@
 ?>
 
 <!DOCTYPE html>
-<html dir="ltr" lang="en">
+<html dir="rtl" lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -24,7 +24,8 @@
     <link href="../assets/libs/chartist/dist/chartist.min.css" rel="stylesheet">
     <link href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="../dist/css/style.min.css" rel="stylesheet">\n    <link href="../assets/css/modern-hostel.css" rel="stylesheet">
+    <link href="../dist/css/style.min.css" rel="stylesheet">
+    <link href="../assets/css/modern-hostel.css" rel="stylesheet">
     
 </head>
 
