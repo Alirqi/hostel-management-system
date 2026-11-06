@@ -11,11 +11,11 @@ let pool;
 function db() {
   if (!pool) {
     pool = mysql.createPool({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT || 3306),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME || "hostelmsphp",
+      host: process.env.DB_HOST || process.env.MYSQLHOST,
+      port: Number(process.env.DB_PORT || process.env.MYSQLPORT || 3306),
+      user: process.env.DB_USER || process.env.MYSQLUSER,
+      password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD,
+      database: process.env.DB_NAME || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || "hostelmsphp",
       waitForConnections: true,
       connectionLimit: 5,
       queueLimit: 0,
@@ -44,7 +44,10 @@ function readSession(req) {
   if (!raw || !secret()) return null;
   const token = decodeURIComponent(raw.slice("hostel_session=".length));
   const [payload, signature] = token.split(".");
-  if (!payload || !signature || !crypto.timingSafeEqual(Buffer.from(sign(payload)), Buffer.from(signature))) return null;
+  if (!payload || !signature) return null;
+  const expected = Buffer.from(sign(payload));
+  const supplied = Buffer.from(signature);
+  if (expected.length !== supplied.length || !crypto.timingSafeEqual(expected, supplied)) return null;
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString());
     return data.exp > Date.now() ? data : null;
@@ -88,13 +91,11 @@ app.post("/api/auth/login", asyncRoute(async (req, res) => {
   const user = { id: account.id, role, email: account.email, username: account.username || null };
   setSession(res, user);
   if (role === "student") {
-    const ip = req.ip || "";
-    const packed = ip.includes(":") ? Buffer.from(ip.split(":").slice(-4).join(":")) : Buffer.from(ip.split(".").map(x => Number(x) || 0));
-    await db().execute("INSERT INTO userLog (userId,userEmail,userIp,city,country) VALUES (?,?,?,?,?)", [account.id, account.email, packed, "", ""]);
+    const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || req.ip || "").split(",")[0].trim();
+    await db().execute("INSERT INTO userLog (userId,userEmail,userIp,city,country) VALUES (?,?,INET6_ATON(?),?,?)", [account.id, account.email, ip, "", ""]);
   } else {
-    const ip = req.ip || "127.0.0.1";
-    const packed = Buffer.from(ip.split(".").map(x => Number(x) || 0));
-    await db().execute("INSERT INTO adminlog (adminid,ip) VALUES (?,?)", [account.id, packed]);
+    const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || req.ip || "127.0.0.1").split(",")[0].trim();
+    await db().execute("INSERT INTO adminlog (adminid,ip) VALUES (?,INET6_ATON(?))", [account.id, ip]);
   }
   res.json({ user });
 }));
@@ -112,8 +113,8 @@ app.get("/api/student/dashboard", auth("student"), asyncRoute(async (req, res) =
   res.json({ student: users[0], booking: bookings[0] || null });
 }));
 app.get("/api/student/activity", auth("student"), asyncRoute(async (req, res) => {
-  const [rows] = await db().execute("SELECT userIp,loginTime FROM userLog WHERE userId=? ORDER BY loginTime DESC LIMIT 50", [req.user.id]);
-  res.json({ activity: rows.map(r => ({ ip: Buffer.isBuffer(r.userIp) ? r.userIp.toString("hex") : "", loginTime: r.loginTime })) });
+  const [rows] = await db().execute("SELECT INET6_NTOA(userIp) AS userIp,loginTime FROM userLog WHERE userId=? ORDER BY loginTime DESC LIMIT 50", [req.user.id]);
+  res.json({ activity: rows.map(r => ({ ip: r.userIp || "", loginTime: r.loginTime })) });
 }));
 app.get("/api/student/room", auth("student"), asyncRoute(async (req, res) => {
   const [rows] = await db().execute("SELECT u.firstName,u.lastName,u.regNo,r.roomno,r.seater,r.feespm,r.foodstatus,r.stayfrom,r.duration,r.course FROM userregistration u LEFT JOIN registration r ON r.regno=u.regNo WHERE u.id=? ORDER BY r.id DESC LIMIT 1", [req.user.id]);
