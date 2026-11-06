@@ -40,8 +40,7 @@ CREATE TABLE `admin` (
 -- إرجاع أو استيراد بيانات الجدول `admin`
 --
 
-INSERT INTO `admin` (`id`, `username`, `email`, `password`, `reg_date`, `updation_date`) VALUES
-(1, 'admin', 'admin@mail.com', 'D00F5D5217896FB7FD601412CB890830', '2020-09-08 20:31:45', '2021-03-07');
+-- Sample data removed: import only the schema, then create fresh records.
 
 -- --------------------------------------------------------
 
@@ -74,16 +73,7 @@ CREATE TABLE `courses` (
 -- إرجاع أو استيراد بيانات الجدول `courses`
 --
 
-INSERT INTO `courses` (`id`, `course_code`, `course_sn`, `course_fn`, `posting_date`) VALUES
-(10, '4', 'جامعة الموصل', 'هندسة برمجيات ', '2022-08-09 06:59:40'),
-(11, '4', 'جامعة الموصل', 'هندسة حاسوب', '2022-08-09 06:59:46'),
-(12, '5', 'جامعة الموصل', 'طب اسنان', '2022-08-09 06:59:58'),
-(13, '4', 'جامعة الموصل', 'فيزياء', '2022-08-23 08:30:31'),
-(14, '4', 'جامعة الموصل', 'تربية رياضية', '2022-08-23 08:30:43'),
-(15, '4', 'جامعة الموصل', 'تربية اسلامية', '2022-08-23 08:30:51'),
-(16, '4', 'جامعة الموصل', 'كلية طب الاسنان', '2022-08-23 08:31:08'),
-(17, '4', 'جامعة الموصل', 'نظم معلومات', '2022-08-23 08:32:38'),
-(18, '2', 'جامعة الموصل', 'معهد برمجة', '2022-08-23 08:32:51');
+-- Sample data removed: import only the schema, then create fresh records.
 
 -- --------------------------------------------------------
 
@@ -127,8 +117,7 @@ CREATE TABLE `registration` (
 -- إرجاع أو استيراد بيانات الجدول `registration`
 --
 
-INSERT INTO `registration` (`id`, `roomno`, `seater`, `feespm`, `foodstatus`, `stayfrom`, `duration`, `course`, `regno`, `firstName`, `middleName`, `lastName`, `gender`, `contactno`, `emailid`, `egycontactno`, `guardianName`, `guardianRelation`, `guardianContactno`, `corresAddress`, `corresCIty`, `corresState`, `corresPincode`, `pmntAddress`, `pmntCity`, `pmnatetState`, `pmntPincode`, `postingDate`, `updationDate`) VALUES
-(21, 310, 1, 500, 1, '2022-08-10', 5, 'هندسة برمجيات ', '120', 'محمد', 'سعيد', 'البياتي', 'ذكر', 7705445247, 'admin1@gmail.com', 551508515, 'سعيد', 'اب', 95628292828, 'العراق/ بغداد', 'بغداد', '', 10200, 'العراق/ بغداد', 'بغداد', '', 10200, '2022-08-09 07:17:46', '');
+-- Sample data removed: import only the schema, then create fresh records.
 
 -- --------------------------------------------------------
 
@@ -148,16 +137,7 @@ CREATE TABLE `rooms` (
 -- إرجاع أو استيراد بيانات الجدول `rooms`
 --
 
-INSERT INTO `rooms` (`id`, `seater`, `room_no`, `fees`, `posting_date`) VALUES
-(1, 5, 100, 100, '2020-09-20 04:24:06'),
-(2, 4, 201, 25, '2020-09-20 04:24:06'),
-(3, 2, 200, 75, '2020-09-20 04:33:06'),
-(4, 3, 112, 50, '2020-09-20 04:33:30'),
-(5, 5, 132, 25, '2020-09-20 04:28:52'),
-(6, 4, 11, 100, '2021-03-07 05:01:02'),
-(7, 2, 269, 50, '2022-04-03 14:39:22'),
-(8, 1, 310, 500, '2022-04-03 14:41:36'),
-(9, 1, 330, 500, '2022-04-03 14:41:53');
+-- Sample data removed: import only the schema, then create fresh records.
 
 -- --------------------------------------------------------
 
@@ -174,43 +154,7 @@ CREATE TABLE `states` (
 -- إرجاع أو استيراد بيانات الجدول `states`
 --
 
-INSERT INTO `states` (`id`, `State`) VALUES
-(1, 'Alabama'),
-(2, 'Alaska'),
-(3, 'Arizona'),
-(4, 'Arkansas'),
-(5, 'California'),
-(6, 'Colorado'),
-(7, 'Connecticut'),
-(8, 'Delaware'),
-(9, 'Florida'),
-(10, 'Georgia'),
-(11, 'Hawaii'),
-(12, 'Idaho'),
-(13, 'Illinois'),
-(14, 'Iowa'),
-(15, 'Kansas'),
-(16, 'Kentucky'),
-(17, 'Louisiana'),
-(18, 'Maine'),
-(19, 'Marryland'),
-(20, 'Massachusetts'),
-(21, 'Michigan'),
-(22, 'Minnesota'),
-(23, 'Mississippi'),
-(24, 'Missouri'),
-(25, 'Nevada'),
-(26, 'New Jersey'),
-(27, 'New York'),
-(28, 'North Carolina'),
-(29, 'North Dakota'),
-(30, 'Ohio'),
-(31, 'Oklahoma'),
-(32, 'South Carolina'),
-(33, 'South Dakota'),
-(34, 'Texas'),
-(35, 'Virginia'),
-(36, 'Washington');
+-- Sample data removed: import only the schema, then create fresh records.
 
 -- --------------------------------------------------------
 
@@ -232,29 +176,7 @@ CREATE TABLE `userlog` (
 -- إرجاع أو استيراد بيانات الجدول `userlog`
 --
 
-INSERT INTO `userlog` (`id`, `userId`, `userEmail`, `userIp`, `city`, `country`, `loginTime`) VALUES
-(9, 10, 'terry@mail.com', 0x3a3a31, '', '', '2021-03-05 04:12:00'),
-(10, 10, 'terry@mail.com', 0x3a3a31, '', '', '2021-03-05 04:14:44'),
-(11, 21, 'ross@mail.com', 0x3a3a31, '', '', '2021-03-05 04:19:52'),
-(12, 21, 'ross@mail.com', 0x3a3a31, '', '', '2021-03-05 08:53:33'),
-(13, 21, 'ross@mail.com', 0x3a3a31, '', '', '2021-03-05 17:35:34'),
-(14, 21, 'ross@mail.com', 0x3a3a31, '', '', '2021-03-06 02:43:01'),
-(15, 21, 'ross@mail.com', 0x3a3a31, '', '', '2021-03-06 15:18:49'),
-(16, 21, 'ross@mail.com', 0x3a3a31, '', '', '2021-03-07 09:35:23'),
-(17, 21, 'ross@mail.com', 0x3a3a31, '', '', '2021-03-07 09:59:55'),
-(18, 22, 'colin@gmail.com', 0x3a3a31, '', '', '2021-06-16 14:51:24'),
-(19, 22, 'colin@gmail.com', 0x3a3a31, '', '', '2021-12-12 15:31:50'),
-(20, 22, 'colin@gmail.com', 0x3a3a31, '', '', '2022-04-02 16:01:31'),
-(21, 21, 'ross@mail.com', 0x3a3a31, '', '', '2022-04-02 16:52:47'),
-(22, 20, 'richards@mail.com', 0x3a3a31, '', '', '2022-04-03 13:15:00'),
-(23, 24, 'jennifer@mail.com', 0x3a3a31, '', '', '2022-04-03 14:32:09'),
-(24, 24, 'jennifer@mail.com', 0x3a3a31, '', '', '2022-04-03 14:34:17'),
-(25, 19, 'bruce@mail.com', 0x3a3a31, '', '', '2022-04-03 14:44:31'),
-(26, 27, 'nancy@mail.com', 0x3a3a31, '', '', '2022-04-03 15:00:46'),
-(27, 32, 'liamoore@mail.com', 0x3a3a31, '', '', '2022-04-03 15:48:35'),
-(28, 32, 'liamoore@mail.com', 0x3a3a31, '', '', '2022-04-03 15:51:34'),
-(29, 33, 'admin1@gmail.com', 0x3a3a31, '', '', '2022-08-09 06:54:56'),
-(30, 33, 'admin1@gmail.com', 0x3a3a31, '', '', '2022-08-09 07:20:15');
+-- Sample data removed: import only the schema, then create fresh records.
 
 -- --------------------------------------------------------
 
@@ -281,8 +203,7 @@ CREATE TABLE `userregistration` (
 -- إرجاع أو استيراد بيانات الجدول `userregistration`
 --
 
-INSERT INTO `userregistration` (`id`, `regNo`, `firstName`, `middleName`, `lastName`, `gender`, `contactNo`, `email`, `password`, `regDate`, `updationDate`, `passUdateDate`) VALUES
-(33, '120', 'محمد', 'سعيد', 'البياتي', 'ذكر', 7705445247, 'admin1@gmail.com', 'e10adc3949ba59abbe56e057f20f883e', '2022-08-09 06:52:43', '', '');
+-- Sample data removed: import only the schema, then create fresh records.
 
 --
 -- Indexes for dumped tables
