@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $insert = $mysqli->prepare('INSERT INTO userregistration (regNo,firstName,middleName,lastName,gender,contactNo,email,password,updationDate,passUdateDate) VALUES (?,?,?,?,?,?,?,?,?,?)');
             $today = date('Y-m-d');
-            $insert->bind_param('sssssissss', $regno,$fname,$mname,$lname,$gender,$contactno,$emailid,$hash,$today,$today);
+            $insert->bind_param('ssssssssss', $regno,$fname,$mname,$lname,$gender,$contactno,$emailid,$hash,$today,$today);
             $insert->execute();
             $insert->close();
             $registerSuccess = 'تم إنشاء حساب الطالب بنجاح.';
