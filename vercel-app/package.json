@@ -1,0 +1,12 @@
+{
+  "name": "hostel-management-vercel",
+  "version": "1.0.0",
+  "private": true,
+  "engines": { "node": "22.x" },
+  "scripts": { "start": "node api/index.js", "dev": "node api/index.js" },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "mysql2": "^3.14.0"
+  }
+}
